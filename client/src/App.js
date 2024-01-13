@@ -13,13 +13,14 @@ import Quiz from "./pages/Quiz";
 import Home from "./pages/Home";
 import SignUp from "./pages/Signup";
 import Login from "./pages/Login";
-
+import VideoRecorder from "./components/video";
 function App() {
 	return (
 		<AuthProvider>
 			<BrowserRouter>
 				<Routes>
 					<Route path="/register" element={<SignUp />} />
+					<Route path="/video" element={<VideoRecorder />} />
 					<Route path="/login" element={<Login />} />
 					<Route element={<ProtectedRoute />}>
 						<Route path="/" element={<Home />} />

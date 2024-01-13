@@ -9,16 +9,12 @@ from pymongo.mongo_client import MongoClient
 from pymongo.server_api import ServerApi
 from flask_cors import CORS
 import json
+import base64
+import numpy as np
 
 app = Flask(__name__)
 CORS(app)
 # ------------------
-
-
-
-video_path = os.path.join(SAVE_FOLDER, "captured_video.mp4")
-fourcc = cv2.VideoWriter_fourcc(*"mp4v")
-out = cv2.VideoWriter(video_path, fourcc, 20.0, (640, 480))
 
 
 face_cascade = cv2.CascadeClassifier(
@@ -41,7 +37,6 @@ def detect_faces():
 
     _, img_encoded = cv2.imencode(".jpg", img)
     img_base64 = base64.b64encode(img_encoded).decode()
-
     return jsonify({"image": "data:image/jpeg;base64," + img_base64})
 
 
