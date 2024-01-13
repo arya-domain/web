@@ -58,12 +58,15 @@ const Start = () => {
 			<div className="container">
 				<div className="row vh-100 align-items-center justify-content-center">
 					<div className="col-lg-8">
-						<h1 className="fw-bold mb-4">You are attempting Test #{quizId}</h1>
+						<div className="mb-4">
+							<h1 className="fw-bold ">All The Best!</h1>
+							<h5>Start the test by clicking below button</h5>
+						</div>
 						<button
 							onClick={handleStart}
 							className="btn px-4 py-2 bg-light text-dark fw-bold"
 							disabled={isLoading}>
-							{isLoading ? "Loading..." : "Start"}
+							{isLoading ? "Loading..." : "Start Test"}
 						</button>
 					</div>
 				</div>
