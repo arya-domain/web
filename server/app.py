@@ -15,87 +15,11 @@ CORS(app)
 # ------------------
 
 
-lock = threading.Lock()
-
-stop_stream = False
-
-# Create directory to store saved videos
-SAVE_FOLDER = "saved_videos"
-if not os.path.exists(SAVE_FOLDER):
-    os.makedirs(SAVE_FOLDER)
 
 video_path = os.path.join(SAVE_FOLDER, "captured_video.mp4")
 fourcc = cv2.VideoWriter_fourcc(*"mp4v")
 out = cv2.VideoWriter(video_path, fourcc, 20.0, (640, 480))
 
-# Load the pre-trained face and eye detection models
-face_cascade = cv2.CascadeClassifier(
-    cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
-)
-eye_cascade = cv2.CascadeClassifier(cv2.data.haarcascades + "haarcascade_eye.xml")
-
-
-@app.route("/stream", methods=["GET"])
-def stream():
-    return Response(generate(), mimetype="multipart/x-mixed-replace; boundary=frame")
-
-
-def generate():
-    # grab global references to the lock variable
-    global lock, stop_stream
-    # initialize the video stream
-    vc = cv2.VideoCapture(1)
-
-    # check camera is open
-    if vc.isOpened():
-        rval, frame = vc.read()
-    else:
-        rval = False
-
-    while rval:
-        with lock:
-            rval, frame = vc.read()
-            gray = cv2.cvtColor(frame, cv2.COLOR_BGR2GRAY)
-            faces = face_cascade.detectMultiScale(gray, scaleFactor=1.5, minNeighbors=5)
-            for x, y, w, h in faces:
-                cv2.rectangle(frame, (x, y), (x + w, y + h), (0, 0, 255), 2)
-                roi_gray = gray[y : y + h, x : x + w]
-                roi_color = frame[y : y + h, x : x + w]
-                eyes = eye_cascade.detectMultiScale(roi_gray)
-                for ex, ey, ew, eh in eyes:
-                    cv2.rectangle(
-                        roi_color, (ex, ey), (ex + ew, ey + eh), (0, 255, 0), 2
-                    )
-
-            if frame is None:
-                continue
-            out.write(frame)
-            (flag, encodedImage) = cv2.imencode(".jpg", frame)
-
-            if not flag:
-                continue
-            if stop_stream:
-                out.release()
-        yield (
-            b"--frame\r\n"
-            b"Content-Type: image/jpeg\r\n\r\n" + bytearray(encodedImage) + b"\r\n"
-        )
-    vc.release()
-
-
-@app.route("/")
-def index():
-    return render_template("index.html")
-
-
-@app.route("/stop_video", methods=["POST"])
-def stop_video():
-    global stop_stream
-    stop_stream = True
-    return render_template("index.html")
-
-
-# ---------------------------------------------------------------------------------------
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
