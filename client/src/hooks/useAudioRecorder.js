@@ -82,13 +82,10 @@ const useAudioRecorder = (questionId = 0) => {
 				audioRecorder.onstart = () => {
 					// setAudioChunks([]);
 					audioChunks = [];
-					console.log("recording...");
 				};
 
 				audioRecorder.onstop = async () => {
 					console.log("stopping");
-
-					console.log(audioChunks);
 
 					const blobObj = new Blob(audioChunks, { type: "audio/webm" });
 					const audioUrl = URL.createObjectURL(blobObj);
@@ -99,7 +96,6 @@ const useAudioRecorder = (questionId = 0) => {
 
 					try {
 						const response = await saveAudioRecording(formData);
-
 						console.log("Server Response:", response.data);
 					} catch (error) {
 						console.error("Error sending audio to the server:", error);
@@ -208,7 +204,6 @@ const useAudioRecorder = (questionId = 0) => {
 		isRecording,
 		startRecording,
 		stopRecording,
-		downloadAudio: () => null,
 	};
 };
 

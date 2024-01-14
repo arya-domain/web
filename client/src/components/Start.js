@@ -4,8 +4,6 @@ import { toast } from "react-toastify";
 
 import DataContext from "../context/dataContext";
 
-import { startQuiz as startQuizApi } from "../apis/quizes.apis";
-
 const Start = () => {
 	const { startQuiz, showStart } = useContext(DataContext);
 	const [isLoading, setisLoading] = useState(false);
@@ -20,10 +18,10 @@ const Start = () => {
 			});
 
 			stream.getTracks().forEach((track) => track.stop());
-			return true; // Media access granted
+			return true;
 		} catch (error) {
 			console.error("Error accessing media devices:", error);
-			return false; // Media access denied
+			return false;
 		}
 	};
 
@@ -31,20 +29,14 @@ const Start = () => {
 		try {
 			setisLoading(true);
 			const isAcessGranted = await checkMediaAccess();
+
 			if (!isAcessGranted) {
 				toast.error("Please allow access to camera and audio!");
 				return;
 			}
 
-			await startQuizApi(quizId);
-
 			startQuiz();
 		} catch (error) {
-			if (error.response?.data?.message) {
-				toast.error(error.response?.data?.message);
-				return;
-			}
-
 			toast.error("something went wrong!");
 		} finally {
 			setisLoading(false);

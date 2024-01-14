@@ -1,14 +1,11 @@
-import { createContext, useState, useEffect, useRef, useCallback } from "react";
+import { createContext, useState, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import { useParams } from "react-router-dom";
-
 import useSWR from "swr";
 
-import { getQuestions } from "../apis/quizes.apis";
-import { saveResponse } from "../apis/responses.apis";
-import { saveRecording } from "../apis/recordings.apis";
+import useVideoRecorder from "../hooks/useVideoRecorder";
 
-import useAudioRecorder from "../hooks/useAudioRecorder";
+import { getQuestions } from "../apis/quizes.apis";
 
 export const DataContext = createContext({});
 
@@ -20,13 +17,6 @@ export const DataProvider = ({ children }) => {
 		isLoading,
 		error,
 	} = useSWR(quizId ? `/quiz/${quizId}/questions` : null, getQuestions);
-
-	const {
-		startRecording: startAudioRecording,
-		stopRecording: stopAudioRecording,
-		isRecording,
-		downloadAudio,
-	} = useAudioRecorder();
 
 	// All Quizs, Current Question, Index of Current Question, Answer, Selected Answer, Total Marks
 	// const [quizs, setQuizs] = useState([]);
@@ -46,7 +36,13 @@ export const DataProvider = ({ children }) => {
 	//recorder
 	const videoRef = useRef(null);
 	const mediaRecorderRef = useRef(null);
-	const [recordedChunks, setRecordedChunks] = useState([]);
+
+	const {
+		canvasRef,
+		videoRef: videoEleRef,
+		stopVideoRec,
+		startVideoRec,
+	} = useVideoRecorder(showQuiz);
 
 	// Set a Single Question
 	useEffect(() => {
@@ -59,8 +55,7 @@ export const DataProvider = ({ children }) => {
 	const startQuiz = () => {
 		setShowStart(false);
 		setShowQuiz(true);
-		// saveRecording();
-		startAudioRecording();
+		startVideoRec();
 	};
 
 	// Check Answer
@@ -90,13 +85,11 @@ export const DataProvider = ({ children }) => {
 	// Next Quesion
 	const nextQuestion = async () => {
 		try {
-			stopAudioRecording();
 			setisSaving(true);
-			await saveResponse(
-				selectedAnswer
-					? { ...selectedAnswer, quizId }
-					: { selectedOptionId: null, questionId: question.id, quizId }
-			);
+
+			const answerData = selectedAnswer
+				? { ...selectedAnswer, quizId }
+				: { selectedOptionId: null, questionId: question.id, quizId };
 
 			setCorrectAnswer("");
 			setSelectedAnswer(null);
@@ -116,7 +109,6 @@ export const DataProvider = ({ children }) => {
 			}
 			setQuestionIndex(newIndex);
 			toast.info("Question No." + newIndex + " Saved successfully!");
-			// startAudioRecording();
 		} catch (error) {
 			console.log(error);
 			toast.error("error saving the response!");
@@ -147,98 +139,9 @@ export const DataProvider = ({ children }) => {
 		rightBtn?.classList.remove("bg-success");
 	};
 
-	const stopRecording = useCallback(() => {
-		console.log("stopping...");
-		console.log(mediaRecorderRef.current.state);
-		if (
-			mediaRecorderRef.current &&
-			mediaRecorderRef.current.state === "recording"
-		) {
-			console.log("if...");
-			mediaRecorderRef.current.stop();
-
-			// Get the MediaStream object from the video element
-			const mediaStream = videoRef.current.srcObject;
-
-			// Stop all tracks in the stream
-			if (mediaStream) {
-				mediaStream.getTracks().forEach((track) => track.stop());
-			}
-
-			// Set the srcObject to null to stop the camera feed
-			videoRef.current.srcObject = null;
-
-			const blob = new Blob(recordedChunks, { type: "video/webm" });
-
-			const formData = new FormData();
-			formData.append("quizId", quizId);
-			formData.append("recording", blob);
-
-			saveRecording(formData);
-		}
-	}, [quizId, recordedChunks]);
-
-	const downloadRecording = () => {
-		if (recordedChunks.length === 0) {
-			console.warn("No recording available");
-			return;
-		}
-
-		const blob = recordedChunks[0];
-		const url = URL.createObjectURL(blob);
-		const a = document.createElement("a");
-		a.href = url;
-		a.download = "recording.webm";
-		document.body.appendChild(a);
-		a.click();
-		window.URL.revokeObjectURL(url);
-	};
-
-	const startRecording = useCallback(async () => {
-		try {
-			const stream = await navigator.mediaDevices.getUserMedia({
-				video: true,
-				audio: true,
-			});
-			videoRef.current.srcObject = stream;
-			mediaRecorderRef.current = new MediaRecorder(stream);
-			const chunks = [];
-
-			mediaRecorderRef.current.ondataavailable = async (event) => {
-				if (event.data.size > 0) {
-					const blob = new Blob([event.data], { type: "video/webm" });
-
-					try {
-						// const formData = new FormData();
-						// formData.append("userId", "1"); // Replace with the actual user ID
-						// formData.append("quizId", quizId + ""); // Replace with the actual quiz ID
-						// // formData.append("recording", blob);
-
-						// await saveRecording(formData);
-
-						console.log("Recording chunk sent to server successfully");
-					} catch (error) {
-						console.error("Error sending recording chunk to server:", error);
-					}
-				}
-			};
-
-			mediaRecorderRef.current.onstop = () => {
-				const blob = new Blob(chunks, { type: "video/webm" });
-				setRecordedChunks([blob]);
-			};
-
-			mediaRecorderRef.current.start();
-		} catch (error) {
-			console.error("Error accessing media devices:", error);
-		}
-	}, []);
-
 	if (error) {
 		console.log(error);
 	}
-
-	console.log(quizs);
 
 	return (
 		<DataContext.Provider
@@ -258,11 +161,12 @@ export const DataProvider = ({ children }) => {
 				marks,
 				startOver,
 				videoRef,
+				canvasRef,
+				videoEleRef,
 				mediaRecorderRef,
-				startRecording,
-				stopRecording,
 				isLoading,
 				isSaving,
+				stopVideoRec,
 			}}>
 			{children}
 		</DataContext.Provider>

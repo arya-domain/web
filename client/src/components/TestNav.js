@@ -1,12 +1,15 @@
-import React, { useState } from "react";
+import React, { useState, useContext } from "react";
 import { Link, useParams, useNavigate } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { endQuiz as endQuizApi } from "../apis/quizes.apis";
+import DataContext from "../context/dataContext";
 
 const TestNav = () => {
 	const { id: quizId } = useParams();
 	const [isloading, setisloading] = useState(false);
+
+	const { stopVideoRec } = useContext(DataContext);
 
 	const navigate = useNavigate();
 
@@ -19,11 +22,12 @@ const TestNav = () => {
 			setisloading(true);
 
 			const d = await endQuizApi(quizId);
-
+			stopVideoRec();
 			toast.success("Test ended!");
 
 			navigate("/");
 		} catch (error) {
+			console.log(error);
 			if (error.response?.data?.message) {
 				toast.error(error.response?.data?.message);
 				return;
