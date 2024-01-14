@@ -1,4 +1,4 @@
-from flask import Flask, render_template, Response, request, jsonify
+from flask import Flask, render_template, Response, request, jsonify, g
 import cv2
 import threading
 import os
@@ -6,6 +6,7 @@ import os
 # ====--------------------------
 from flask_bcrypt import Bcrypt
 from pymongo.mongo_client import MongoClient
+import psycopg2
 from pymongo.server_api import ServerApi
 from flask_cors import CORS
 import json
@@ -15,6 +16,32 @@ import numpy as np
 app = Flask(__name__)
 CORS(app)
 # ------------------
+
+app.config['DATABASE'] = {
+    'user': 'postgres',
+    'password': '',
+    'host': 'localhost',
+    'dbname': ''
+}
+
+
+def connect_db():
+    return psycopg2.connect(
+        user=app.config['DATABASE']['user'],
+        password=app.config['DATABASE']['password'],
+        host=app.config['DATABASE']['host'],
+        dbname=app.config['DATABASE']['dbname']
+    )
+
+@app.before_request
+def before_request():
+    g.db = connect_db()
+
+@app.teardown_request
+def teardown_request(exception):
+    db = getattr(g, 'db', None)
+    if db is not None:
+        db.close()
 
 
 face_cascade = cv2.CascadeClassifier(
@@ -50,7 +77,11 @@ bcrypt = Bcrypt(app)
 def mongodb_test():
     try:
         client.admin.command("ping")
-        return jsonify({"message": "Connection successful"})
+        cursor = g.db.cursor()
+        cursor.execute('SELECT * FROM users')
+        result = cursor.fetchall()
+        cursor.close();
+        return jsonify({'result': result})
     except Exception as e:
         return jsonify({"message": "Connection failed", "error": str(e)})
 
@@ -103,6 +134,6 @@ def get_quiz():
 if __name__ == "__main__":
     host = "127.0.0.1"
     port = 8000
-    debug = False
+    debug = True
     options = None
     app.run(host, port, debug, options)
