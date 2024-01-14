@@ -2,6 +2,7 @@
     {
         "id": 1,
         "question": "Do you confirm to be comfortable working in an environment with tight deadlines and frequent changes?",
+        "set_id": 1,
         "options": [
             {
                 "id": 1,
@@ -28,6 +29,7 @@
     {
         "id": 2,
         "question": "Do you confirm to handle unexpected challenges and uncertainties in your work?",
+        "set_id": 1,
         "options": [
             {
                 "id": 6,
@@ -54,6 +56,7 @@
     {
         "id": 3,
         "question": "When faced with conflicting priorities, do you confirm to be able to prioritize and manage your tasks?",
+        "set_id": 1,
         "options": [
             {
                 "id": 11,
@@ -80,6 +83,7 @@
     {
         "id": 4,
         "question": "In a team setting, do you confirm that it is important for you to maintain a calm and stable work environment?",
+        "set_id": 1,
         "options": [
             {
                 "id": 16,
@@ -106,6 +110,7 @@
     {
         "id": 5,
         "question": "Do you confirm to be able to adapt to changes in work processes or procedures?",
+        "set_id": 1,
         "options": [
             {
                 "id": 21,
@@ -132,6 +137,7 @@
     {
         "id": 6,
         "question": "When given repetitive tasks, do you confirm to maintain your motivation and focus?",
+        "set_id": 1,
         "options": [
             {
                 "id": 26,
@@ -158,6 +164,7 @@
     {
         "id": 7,
         "question": "Do you confirm to be patient when you are dealing with unexpected delays or disruptions in your work?",
+        "set_id": 1,
         "options": [
             {
                 "id": 31,
@@ -184,6 +191,7 @@
     {
         "id": 8,
         "question": "Do you confirm that you are comfortable with routine and predictability in your daily work tasks?",
+        "set_id": 1,
         "options": [
             {
                 "id": 36,
@@ -210,6 +218,7 @@
     {
         "id": 9,
         "question": "Do you prefer a consistent and stable work routine? Rate your answer and provide reason",
+        "set_id": 1,
         "options": [
             {
                 "id": 41,
@@ -236,6 +245,7 @@
     {
         "id": 10,
         "question": "Do you confirm that it is important for you to establish and maintain long-term relationships with your colleagues?",
+        "set_id": 1,
         "options": [
             {
                 "id": 46,
@@ -262,6 +272,7 @@
     {
         "id": 11,
         "question": "When facing tight deadlines, do you confirm to manage your stress and pressure?",
+        "set_id": 2,
         "options": [
             {
                 "id": 51,
@@ -288,6 +299,7 @@
     {
         "id": 12,
         "question": "Do you confirm to adapt well to changes in the organizational structure or team dynamics?",
+        "set_id": 2,
         "options": [
             {
                 "id": 56,
@@ -314,6 +326,7 @@
     {
         "id": 13,
         "question": "Do you confirm that you are comfortable with routine and repetitive tasks? Rate your answer and provide reason if you feel otherwise",
+        "set_id": 2,
         "options": [
             {
                 "id": 61,
@@ -340,6 +353,7 @@
     {
         "id": 14,
         "question": "Do you confirm to handle situations well where there is a lack of clear instructions or guidance? Rate your answer and explain how.",
+        "set_id": 2,
         "options": [
             {
                 "id": 66,
@@ -366,6 +380,7 @@
     {
         "id": 15,
         "question": "When faced with conflicting opinions within a team, do you confirm to contribute to resolving the conflicts?",
+        "set_id": 2,
         "options": [
             {
                 "id": 71,
@@ -392,6 +407,7 @@
     {
         "id": 16,
         "question": "Do you confirm to approach situations with patience where you need to wait for information or decisions from others? Rate your answer and explain properly.",
+        "set_id": 2,
         "options": [
             {
                 "id": 76,
@@ -418,6 +434,7 @@
     {
         "id": 17,
         "question": "In a team setting, do you ensure that everyone is heard and their opinions are considered? Rate your answer and explain how.",
+        "set_id": 2,
         "options": [
             {
                 "id": 81,
@@ -444,6 +461,7 @@
     {
         "id": 18,
         "question": "Do you confirm that it is important for you to establish a consistent work routine and schedule?",
+        "set_id": 2,
         "options": [
             {
                 "id": 86,
@@ -470,6 +488,7 @@
     {
         "id": 19,
         "question": "When facing unexpected changes, do you confirm to communicate and reassure your team members?",
+        "set_id": 2,
         "options": [
             {
                 "id": 91,
@@ -496,6 +515,7 @@
     {
         "id": 20,
         "question": "Do you confirm to handle situations where there is ambiguity or lack of clarity in your tasks? Rate your answer and explain how.",
+        "set_id": 2,
         "options": [
             {
                 "id": 96,
