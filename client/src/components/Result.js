@@ -4,10 +4,9 @@ import { useParams } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import DataContext from "../context/dataContext";
-import { endQuiz as endQuizApi } from "../apis/quizes.apis";
 
 const Result = () => {
-	const { showResult, stopRecording } = useContext(DataContext);
+	const { showResult, stopVideoRec } = useContext(DataContext);
 	const [isLoading, setisLoading] = useState(false);
 	const [isSuccess, setisSuccess] = useState(false);
 	const [isError, setisError] = useState(false);
@@ -21,24 +20,17 @@ const Result = () => {
 
 	useEffect(() => {
 		if (showResult) {
-			stopRecording();
+			stopVideoRec();
 
 			async function endTest() {
 				try {
 					setisLoading(true);
-
-					await endQuizApi(quizId);
 
 					toast.success("Test submitted successfully!");
 
 					setisSuccess(true);
 					setisError(false);
 				} catch (error) {
-					if (error.response?.data?.message) {
-						toast.error(error.response?.data?.message);
-						return;
-					}
-
 					setisError(true);
 					setisSuccess(false);
 					toast.error("something went wrong!");
@@ -49,7 +41,7 @@ const Result = () => {
 
 			endTest();
 		}
-	}, [stopRecording, showResult, quizId]);
+	}, [stopVideoRec, showResult, quizId]);
 
 	return (
 		<section
