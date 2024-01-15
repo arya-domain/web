@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Navigate } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -13,7 +13,7 @@ function Login() {
 	const [isloading, setisloading] = useState(false);
 
 	const navigate = useNavigate();
-	const { setAuth } = useAuth();
+	const { setAuth, isAuth } = useAuth();
 
 	const handleSubmit = async (event) => {
 		event.preventDefault();
@@ -42,6 +42,10 @@ function Login() {
 			setisloading(false);
 		}
 	};
+
+	if (isAuth) {
+		return <Navigate to={"/"} />;
+	}
 
 	return (
 		<section className="bg-dark">
