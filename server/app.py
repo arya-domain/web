@@ -8,8 +8,9 @@ from flask_cors import CORS
 import json
 import base64
 import numpy as np
-
+import psycopg2
 # ====--------------
+
 from controllers.auth import register, login
 from db import connect_db, close_db
 
@@ -17,8 +18,26 @@ app = Flask(__name__)
 CORS(app)
 # ------------------
 
-app.before_request(connect_db)
-app.teardown_request(close_db)
+conn=psycopg2.connect(
+            user='postgres',
+            password='abc',
+            host='localhost',
+            dbname='hr_app',
+            port="5432"
+        )
+
+cur=conn.cursor()
+
+cur.execute(
+    """ CREATE TABLE IF NOT EXISTS users (email varchar(255),first_name char(255), last_name char(255),password varchar(255) )"""
+)
+
+conn.commit()
+
+cur.close()
+conn.close()
+
+
 
 face_cascade = cv2.CascadeClassifier(
     cv2.data.haarcascades + "haarcascade_frontalface_default.xml"
@@ -35,7 +54,7 @@ def detect_faces():
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
     for x, y, w, h in faces:
-        cv2.rectangle(img, (x, y), (x + w, y + h), (255, 0, 0), 2)
+        cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
     _, img_encoded = cv2.imencode(".jpg", img)
     img_base64 = base64.b64encode(img_encoded).decode()
