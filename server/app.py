@@ -8,35 +8,18 @@ from flask_cors import CORS
 import json
 import base64
 import numpy as np
-import psycopg2
 # ====--------------
 
 from controllers.auth import register, login
+from controllers.user_responses import save_audio, save_video
 from db import connect_db, close_db
 
 app = Flask(__name__)
 CORS(app)
 # ------------------
 
-conn=psycopg2.connect(
-            user='postgres',
-            password='abc',
-            host='localhost',
-            dbname='hr_app',
-            port="5432"
-        )
-
-cur=conn.cursor()
-
-cur.execute(
-    """ CREATE TABLE IF NOT EXISTS users (email varchar(255),first_name char(255), last_name char(255),password varchar(255) )"""
-)
-
-conn.commit()
-
-cur.close()
-conn.close()
-
+app.before_request(connect_db)
+app.teardown_request(close_db)
 
 
 face_cascade = cv2.CascadeClassifier(
@@ -63,6 +46,8 @@ def detect_faces():
 
 app.route('/user/register', methods=['POST'])(register)
 app.route('/user/login', methods=['POST'])(login)
+app.route('/user/user-responses/video', methods=['POST'])(save_video)
+app.route('/user/user-responses/audio', methods=['POST'])(save_audio)
 
 
 @app.route("/quiz", methods=["GET"])

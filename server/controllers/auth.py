@@ -1,7 +1,5 @@
 from flask import request, jsonify
-import bcrypt
 from psycopg2 import sql
-import psycopg2
 from werkzeug.security import generate_password_hash, check_password_hash
 
 from db import execute_query, get_db
@@ -17,66 +15,51 @@ def register():
 
         # Validating the data
         if not validate_user_data(email, password, first_name, last_name):
-            return jsonify({"error": "Invalid user data"}), 400
+            return jsonify({"message": "Invalid user data"}), 400
 
         # triming and modifying
         email = email.strip()
         first_name = first_name.strip()
         last_name = last_name.strip()
         password = password.strip()
-        password =  generate_password_hash(password, method='md5')
+        password =  generate_password_hash(password, method='sha256')
 
-        print(email,first_name,password)
+        # Check if email already exists
+        existing_user = execute_query(sql.SQL("SELECT id FROM users WHERE email = %s"), (email,), fetchone=True)
 
-        conn=psycopg2.connect(
-            user='postgres',
-            password='abc',
-            host='localhost',
-            dbname='hr_app',
-            port="5432"
-        )
-        cur=conn.cursor()
-        # print(conn)
-        # cur=conn.cursor()
-        # print(cur)
-        # existing_user=cur.execute("SELECT first_name FROM details WHERE email = %s",(email)).fetchone()
-        # print(existing_user is None)
-        # cur.close()
-        # conn.close()
-        # print(conn)
-        # if existing_user:
-        #     return jsonify({"error": "User with that email already exists"}), 409
+        if existing_user:
+            return jsonify({"message": "User with that email already exists"}), 409
 
         # Inserting
-        cur.execute(
-            """
-                INSERT INTO details (email, password, first_name, last_name)
+        result = execute_query(
+            sql.SQL("""
+                INSERT INTO users (email, password, first_name, last_name)
                 VALUES (%s, %s, %s, %s)
-            """,
-            (email, password, first_name, last_name))
-        conn.commit()
-        cur.execute("select * from details")
-        result=cur.fetchone()
-        cur.close()
-        conn.close()
-        print(result)
-        # # Commit changes
-        # get_db().commit()
+                RETURNING id, email, first_name, last_name, created_at, updated_at
+            """),
+            (email, password, first_name, last_name),
+            fetchone=True
+        )
+
+        # Commit changes
+        get_db().commit()
 
         if result:
             inserted_data = {
                 "id": result[0],
                 "email": result[1],
-                "first_name": result[2],
-                "last_name": result[3]
+                "firstName": result[2],
+                "lastName": result[3],
+                "created_at": result[4],
+                "updated_at": result[5]
             }
             return jsonify({"result": inserted_data}), 201
         else:
-            return jsonify({"error": "Registration failed"}), 500
+            return jsonify({"message": "Registration failed"}), 500
 
     except Exception as e:
         get_db().rollback()
-        return jsonify({"error": str(e)}), 500
+        return jsonify({"message": str(e)}), 500
 
 def login():
     try:
@@ -84,35 +67,28 @@ def login():
         email = request.json.get("email")
         password = request.json.get("password")
 
-        conn=psycopg2.connect(
-            user='postgres',
-            password='abc',
-            host='localhost',
-            dbname='hr_app',
-            port="5432"
-        )
-        cur=conn.cursor()
-
         if not validate_email(email):
-            return jsonify({"error": "Invalid Email"}), 400
+            return jsonify({"message": "Invalid Email"}), 400
 
         email = email.strip()
 
-        cur.execute(f"SELECT email, password FROM details WHERE email = '{email}'")
-        user=cur.fetchone()
+        # Check if user exists!
+        user = execute_query(sql.SQL("SELECT * FROM users WHERE email = %s"), (email,), fetchone=True)
 
-        print(user)
+        if user == None:
+            return jsonify({"message": "Invalid credentials"}), 401
 
-        cur.close()
-        conn.close()
-
-        if check_password_hash(user[1], password):
+        if check_password_hash(user[2], password):
             user_data = {
-                "email": user[0],
+                "id": user[0],
+                "email": user[1],
+                "firstName":user[3],
+                "lastName":user[4],
             }
-            return jsonify({"user": user_data}), 200
+            return jsonify(user_data), 200
         else:
-            return jsonify({"error": "Invalid credentials"}), 401
+            return jsonify({"message": "Invalid credentials"}), 401
 
     except Exception as e:
-        return jsonify({"error": str(e)}), 500
+        print(e)
+        return jsonify({"message": str(e)}), 500

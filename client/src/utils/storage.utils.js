@@ -5,13 +5,13 @@ export const KEYS = {
 };
 
 export const getUser = () => {
-	// return secureStorage.getItem(KEYS.USER);
-	return {
-		isAuth: true,
-		id: 2,
-		firstName: "John",
-		token: "str-token",
-	};
+	return secureStorage.getItem(KEYS.USER);
+	// return {
+	// 	isAuth: true,
+	// 	id: 2,
+	// 	firstName: "John",
+	// 	token: "str-token",
+	// };
 };
 
 export const setUser = (user = {}) => {
