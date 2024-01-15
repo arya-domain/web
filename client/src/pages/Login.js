@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
 import { toast } from "react-toastify";
 
@@ -76,6 +76,12 @@ function Login() {
 								{isloading ? "Loading..." : "Login"}
 							</Button>
 						</Form>
+						<div className="mt-3">
+							<span>If you don't have an account</span>{" "}
+							<span>
+								<Link to="/register">register here.</Link>
+							</span>
+						</div>
 					</Col>
 				</Row>
 			</Container>

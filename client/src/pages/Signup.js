@@ -1,6 +1,6 @@
 import React, { useState } from "react";
 import { Container, Row, Col, Form, Button } from "react-bootstrap";
-import { useNavigate, Navigate } from "react-router-dom";
+import { useNavigate, Navigate, Link } from "react-router-dom";
 import { toast } from "react-toastify";
 
 import { useAuth } from "../context/AuthProvider";
@@ -70,53 +70,61 @@ function Registration() {
 			<Container
 				className="d-flex justify-content-center align-items-center"
 				style={{ height: "100vh" }}>
-				<Row className="w-50 p-4 rounded-3 bg-light">
-					<Col>
-						<h2 className="text-center mb-4">Registration</h2>
-						<Form onSubmit={handleSubmit}>
-							<Form.Group className="mb-3">
-								<Form.Label>First Name</Form.Label>
-								<Form.Control
-									type="text"
-									value={firstName}
-									onChange={(e) => setFirstName(e.target.value)}
-									required
-								/>
-							</Form.Group>
-							<Form.Group className="mb-3">
-								<Form.Label>Last Name</Form.Label>
-								<Form.Control
-									type="text"
-									value={lastName}
-									onChange={(e) => setLastName(e.target.value)}
-									required
-								/>
-							</Form.Group>
-							<Form.Group className="mb-3">
-								<Form.Label>Email</Form.Label>
-								<Form.Control
-									type="email"
-									value={email}
-									onChange={(e) => setEmail(e.target.value)}
-									required
-								/>
-							</Form.Group>
-							<Form.Group className="mb-3">
-								<Form.Label>Password</Form.Label>
-								<Form.Control
-									type="password"
-									value={password}
-									onChange={(e) => setPassword(e.target.value)}
-									required
-									minLength={5}
-								/>
-							</Form.Group>
-							<Button variant="primary" type="submit" disabled={isloading}>
-								{isloading ? "Loading..." : "Register"}
-							</Button>
-						</Form>
-					</Col>
-				</Row>
+				<div className="w-50 p-4 rounded-3 bg-light">
+					<Row>
+						<Col>
+							<h2 className="text-center mb-4">Registration</h2>
+							<Form onSubmit={handleSubmit}>
+								<Form.Group className="mb-3">
+									<Form.Label>First Name</Form.Label>
+									<Form.Control
+										type="text"
+										value={firstName}
+										onChange={(e) => setFirstName(e.target.value)}
+										required
+									/>
+								</Form.Group>
+								<Form.Group className="mb-3">
+									<Form.Label>Last Name</Form.Label>
+									<Form.Control
+										type="text"
+										value={lastName}
+										onChange={(e) => setLastName(e.target.value)}
+										required
+									/>
+								</Form.Group>
+								<Form.Group className="mb-3">
+									<Form.Label>Email</Form.Label>
+									<Form.Control
+										type="email"
+										value={email}
+										onChange={(e) => setEmail(e.target.value)}
+										required
+									/>
+								</Form.Group>
+								<Form.Group className="mb-3">
+									<Form.Label>Password</Form.Label>
+									<Form.Control
+										type="password"
+										value={password}
+										onChange={(e) => setPassword(e.target.value)}
+										required
+										minLength={5}
+									/>
+								</Form.Group>
+								<Button variant="primary" type="submit" disabled={isloading}>
+									{isloading ? "Loading..." : "Register"}
+								</Button>
+							</Form>
+							<div className="mt-3">
+								<span>If you have an account</span>{" "}
+								<span>
+									<Link to="/login">login here.</Link>
+								</span>
+							</div>
+						</Col>
+					</Row>
+				</div>
 			</Container>
 		</section>
 	);
