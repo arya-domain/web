@@ -1,6 +1,7 @@
 from flask import request, jsonify
 from psycopg2 import sql
 from werkzeug.security import generate_password_hash, check_password_hash
+from flask_jwt_extended import create_access_token
 
 from db import execute_query, get_db
 from utils.validate import validate_user_data , validate_email
@@ -77,6 +78,8 @@ def login():
 
         if user == None:
             return jsonify({"message": "Invalid credentials"}), 401
+        
+        access_token = create_access_token(identity=user[0])
 
         if check_password_hash(user[2], password):
             user_data = {
@@ -84,6 +87,7 @@ def login():
                 "email": user[1],
                 "firstName":user[3],
                 "lastName":user[4],
+                "token": access_token
             }
             return jsonify(user_data), 200
         else:

@@ -5,16 +5,21 @@ import os
 
 # ====--------------------------
 from flask_cors import CORS
-import json
+from flask_jwt_extended import JWTManager
 import base64
 import numpy as np
 # ====--------------
 
 from controllers.auth import register, login
 from controllers.user_responses import save_audio, save_video
+from controllers.quiz import get_quiz
 from db import connect_db, close_db
 
 app = Flask(__name__)
+
+app.config['JWT_SECRET_KEY'] = 'random-string-which-should-not-be-visible-here'
+jwt = JWTManager(app)
+
 CORS(app)
 # ------------------
 
@@ -49,13 +54,7 @@ app.route('/user/login', methods=['POST'])(login)
 app.route('/user/user-responses/video', methods=['POST'])(save_video)
 app.route('/user/user-responses/audio', methods=['POST'])(save_audio)
 
-
-@app.route("/quiz", methods=["GET"])
-def get_quiz():
-    with open("./quiz.json") as f:
-        data = json.load(f)
-    print(jsonify(data))
-    return jsonify(data)
+app.add_url_rule('/quiz', 'quiz', get_quiz, methods=['GET'])
 
 if __name__ == "__main__":
     host = "127.0.0.1"
