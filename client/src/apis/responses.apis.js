@@ -12,3 +12,12 @@ export const saveResponse = async (
 	// 	},
 	// });
 };
+
+export const saveAudioRecAPI = async (fd) => {
+	const { token } = secureStorage.getUser();
+	await axios.post(`/user/user-responses/audio`, fd, {
+		headers: {
+			Authorization: "Bearer " + token,
+		},
+	});
+};

@@ -1,6 +1,8 @@
 import { useEffect, useState } from "react";
 import { useContext } from "react";
+
 import DataContext from "../context/dataContext";
+import useAudioRecorder from "../hooks/useAudioRecorder";
 
 let interval;
 
@@ -18,7 +20,7 @@ function setTimerSpanEle(msec = 0) {
 	timerSpanEle.textContent = millisecondsToTime(msec);
 }
 
-const useTimer = () => {
+const useTimer = (onNext = () => null) => {
 	const { nextQuestion } = useContext(DataContext);
 
 	function resetTimer() {
@@ -31,6 +33,7 @@ const useTimer = () => {
 
 			if (newTimer < 0) {
 				nextQuestion();
+				onNext?.();
 				setTimerSpanEle(MAX_MINS_MSEC);
 				return;
 			}
@@ -41,7 +44,7 @@ const useTimer = () => {
 		return () => {
 			clearInterval(interval);
 		};
-	}, [nextQuestion]);
+	}, [nextQuestion, onNext]);
 
 	return {
 		resetTimer,
