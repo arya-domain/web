@@ -8,3 +8,15 @@ def validate_user_data(email, password, first_name, last_name):
         return False
 
     return True
+
+def validate_question_id(question_id):
+    try:
+        question_id = int(question_id)
+
+        if question_id <= 0:
+            return False
+
+        return True
+
+    except ValueError:
+        return False

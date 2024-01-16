@@ -1,5 +1,6 @@
 from flask import Flask, render_template, Response, request, jsonify, g
 import cv2
+from datetime import timedelta
 import threading
 import os
 
@@ -18,6 +19,7 @@ from db import connect_db, close_db
 app = Flask(__name__)
 
 app.config['JWT_SECRET_KEY'] = 'random-string-which-should-not-be-visible-here'
+app.config['JWT_EXPIRATION_DELTA'] = timedelta(hours=4)
 jwt = JWTManager(app)
 
 CORS(app)

@@ -55,9 +55,13 @@ const Result = () => {
 							className={`text-light text-center p-5 rounded ${
 								isSuccess ? "bg-success" : isError ? "bg-danger" : "bg-info"
 							}`}>
-							<h1 className="mb-2 fw-bold">{"Nice"}</h1>
 							{isSuccess && (
-								<h3 className="mb-3 fw-bold">Test Submitted successfully</h3>
+								<div>
+									<h1 className="mb-2 fw-bold">
+										Thank you for taking the test!
+									</h1>
+									<h3 className="mb-3 fw-bold">Test Submitted successfully</h3>
+								</div>
 							)}
 							{isError && (
 								<h3 className="mb-3 fw-bold">Failed To Submit Your Test</h3>
@@ -66,7 +70,7 @@ const Result = () => {
 							<button
 								onClick={handleEnd}
 								className="btn py-2 px-4 btn-light fw-bold d-inline">
-								End
+								Exit
 							</button>
 						</div>
 					</div>
