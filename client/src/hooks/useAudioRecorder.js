@@ -25,7 +25,7 @@ const useAudioRecorder = (question_id) => {
 					setIsRecording(false);
 
 					const blobObj = new Blob(audioChunks, { type: "audio/webm" });
-					// const audioUrl = URL.createObjectURL(blobObj);
+					const audioUrl = URL.createObjectURL(blobObj);
 
 					const formData = new FormData();
 					formData.append("audio", blobObj, "recorded_audio.mp3");
@@ -33,7 +33,6 @@ const useAudioRecorder = (question_id) => {
 
 					try {
 						const response = await saveAudioRecAPI(formData);
-
 						console.log("Server Response:", response.data);
 					} catch (error) {
 						console.error("Error sending audio to the server:", error);

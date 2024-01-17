@@ -6,6 +6,7 @@ import VideoRecorder from "./video";
 import useTimer from "./useTimer";
 import useSpeechToText from "../hooks/useSpeechToText";
 import useAudioRecorder from "../hooks/useAudioRecorder";
+import useVideoRecording from "../hooks/useVideoRecording";
 
 const Quiz = () => {
 	const {
@@ -24,9 +25,14 @@ const Quiz = () => {
 	const [showHelperText, setShowHelperText] = useState(true);
 
 	const audioRecorderState = useAudioRecorder(question?.id);
-	const { resetTimer, initialTimer } = useTimer(
-		audioRecorderState.stopRecording
-	);
+	const videoRecordingState = useVideoRecording(question?.id);
+
+	const handleTimerNext = useCallback(() => {
+		audioRecorderState.stopRecording();
+		videoRecordingState.stopRecording();
+	}, [audioRecorderState, videoRecordingState]);
+
+	const { resetTimer, initialTimer } = useTimer(handleTimerNext);
 
 	// const handleTextRecive = useCallback(
 	// 	(text) => {

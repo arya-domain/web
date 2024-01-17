@@ -21,3 +21,12 @@ export const saveAudioRecAPI = async (fd) => {
 		},
 	});
 };
+
+export const saveVideoRecAPI = async (fd) => {
+	const { token } = secureStorage.getUser();
+	await axios.post(`/user/user-responses/video`, fd, {
+		headers: {
+			Authorization: "Bearer " + token,
+		},
+	});
+};
