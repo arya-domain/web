@@ -34,54 +34,23 @@ face_cascade = cv2.CascadeClassifier(
 )
 
 @app.route("/api/detect", methods=["POST"])
-def detect_faces_batch():
-    try:
-        data = request.get_json()
 
-        # Extract and process multiple frames
-        frames = [base64.b64decode(frame_data.split(",")[1]) for frame_data in data["frames"]]
-        processed_frames = [process_frame(frame) for frame in frames]
-
-        # Return the processed frames as a single response
-        return jsonify({"processed_frames": processed_frames})
-
-    except Exception as e:
-        return jsonify({"error": str(e)}), 500
-
-def process_frame(frame_data):
-    # Decode and process a single frame
-    npimg = np.frombuffer(frame_data, dtype=np.uint8)
+@app.route("/api/detect", methods=["POST"])
+def detect_faces():
+    data = request.get_json()
+    img_data = base64.b64decode(data["image"].split(",")[1])
+    npimg = np.fromstring(img_data, np.uint8)
     img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
 
-    # Perform face detection
     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
 
-    # Draw rectangles around faces
     for x, y, w, h in faces:
         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
 
     _, img_encoded = cv2.imencode(".jpg", img)
     img_base64 = base64.b64encode(img_encoded).decode()
-
-    return {"image": "data:image/jpeg;base64," + img_base64}
-
-# @app.route("/api/detect", methods=["POST"])
-# def detect_faces():
-#     data = request.get_json()
-#     img_data = base64.b64decode(data["image"].split(",")[1])
-#     npimg = np.fromstring(img_data, np.uint8)
-#     img = cv2.imdecode(npimg, cv2.IMREAD_COLOR)
-
-#     gray = cv2.cvtColor(img, cv2.COLOR_BGR2GRAY)
-#     faces = face_cascade.detectMultiScale(gray, 1.1, 4)
-
-#     for x, y, w, h in faces:
-#         cv2.rectangle(img, (x, y), (x + w, y + h), (0, 0, 255), 2)
-
-#     _, img_encoded = cv2.imencode(".jpg", img)
-#     img_base64 = base64.b64encode(img_encoded).decode()
-#     return jsonify({"image": "data:image/jpeg;base64,"})
+    return jsonify({"image": "data:image/jpeg;base64,"})
 
 
 app.route('/user/register', methods=['POST'])(register)
