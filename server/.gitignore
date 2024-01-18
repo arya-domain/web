@@ -4,7 +4,8 @@
 /node_modules
 /.pnp
 .pnp.js
-/server
+/server/hr-app
+/server/recordings/*
 __pycache__
 
 # testing
