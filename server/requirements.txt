@@ -6,3 +6,8 @@ psycopg2==2.9.9
 validate_email_address==1
 Werkzeug==2.3.4
 numpy==1.23.5
+python-socketio==5.11.0
+flask_socketio==5.3.6
+fer==22.5.1
+SpeechRecognition==3.10.1
+tensorflow==2.10.0
