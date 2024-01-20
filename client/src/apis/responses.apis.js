@@ -30,3 +30,18 @@ export const saveVideoRecAPI = async (fd) => {
 		},
 	});
 };
+
+export const processResponseAPI = async (quizId) => {
+	const { token } = secureStorage.getUser();
+	const { data } = await axios.post(
+		`/api/processing`,
+		{ quiz_id: quizId },
+		{
+			headers: {
+				Authorization: "Bearer " + token,
+			},
+		}
+	);
+
+	return data;
+};

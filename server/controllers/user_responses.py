@@ -203,11 +203,12 @@ def save_audio():
     except Exception as e:
         return jsonify({"message": str(e)}), 500
     
-@jwt_required()
+# @jwt_required()
 def save_video():
     try:
 
-        user_id = get_jwt_identity();
+        # user_id = get_jwt_identity();
+        user_id = 8;
 
         if 'video' not in request.files:
             return jsonify({"message": "video files are required"}), 400

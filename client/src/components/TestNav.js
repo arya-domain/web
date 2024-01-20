@@ -9,7 +9,7 @@ const TestNav = () => {
 	const { id: quizId } = useParams();
 	const [isloading, setisloading] = useState(false);
 
-	const { stopVideoRec } = useContext(DataContext);
+	const { stopRecording } = useContext(DataContext);
 
 	const navigate = useNavigate();
 
@@ -21,8 +21,9 @@ const TestNav = () => {
 		try {
 			setisloading(true);
 
+			stopRecording();
+
 			const d = await endQuizApi(quizId);
-			stopVideoRec();
 			toast.success("Test ended!");
 
 			navigate("/");

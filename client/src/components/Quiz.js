@@ -3,36 +3,20 @@ import Alert from "react-bootstrap/Alert";
 
 import DataContext from "../context/dataContext";
 import VideoRecorder from "./video";
-import useTimer from "./useTimer";
+import useTimer from "../hooks/useTimer";
 import useSpeechToText from "../hooks/useSpeechToText";
 import useAudioRecorder from "../hooks/useAudioRecorder";
 import useVideoRecording from "../hooks/useVideoRecording";
 
 const Quiz = () => {
-	const {
-		showQuiz,
-		question,
-		quizs,
-		checkAnswer,
-		correctAnswer,
-		selectedAnswer,
-		questionIndex,
-		nextQuestion,
-		showTheResult,
-		isSaving,
-	} = useContext(DataContext);
+	const { activeQuesNo, totalQues, question, isSaving } =
+		useContext(DataContext);
 
 	const [showHelperText, setShowHelperText] = useState(true);
 
-	const audioRecorderState = useAudioRecorder(question?.id);
-	const videoRecordingState = useVideoRecording(question?.id);
+	// const videoRecordingState = useVideoRecording(question?.id);
 
-	const handleTimerNext = useCallback(() => {
-		audioRecorderState.stopRecording();
-		videoRecordingState.stopRecording();
-	}, [audioRecorderState, videoRecordingState]);
-
-	const { resetTimer, initialTimer } = useTimer(handleTimerNext);
+	// videoRecordingState.stopRecording
 
 	// const handleTextRecive = useCallback(
 	// 	(text) => {
@@ -52,9 +36,7 @@ const Quiz = () => {
 	// useSpeechToText(handleTextRecive);
 
 	return (
-		<section
-			className="bg-dark text-white"
-			style={{ display: `${showQuiz ? "block" : "none"}` }}>
+		<section className="bg-dark text-white">
 			<div className="vh-100 d-flex align-items-center justify-content-center">
 				<div className="container">
 					{showHelperText && (
@@ -74,13 +56,13 @@ const Quiz = () => {
 						</div>
 						<div className="col-lg-7" style={{ height: "auto" }}>
 							{isSaving ? (
-								<h1>Loading...</h1>
+								<h1>Saving your response...</h1>
 							) : (
 								<div
 									className="card p-4"
 									style={{ background: "#3d3d3d", borderColor: "#646464" }}>
 									<h4 className="text-danger fw-bold">
-										<span id={"timer-span"}>{initialTimer}</span>
+										<span id={"timer-span"}></span>
 										{/* <span className="m-2 lead text-white">
 												Minutes is remaining for this question
 											</span> */}
@@ -96,7 +78,7 @@ const Quiz = () => {
 												width: "100px",
 												textAlign: "right",
 											}}>
-											{quizs.indexOf(question) + 1} / {quizs?.length}
+											{activeQuesNo} / {totalQues}
 										</h5>
 									</div>
 									<div>
@@ -104,10 +86,7 @@ const Quiz = () => {
 											<button
 												key={index}
 												id={"opt-btn-" + item.id}
-												className={`option w-100 text-start btn text-white py-2 px-3 mt-3 rounded btn-dark ${
-													correctAnswer === item && "bg-success"
-												}`}
-												onClick={(event) => checkAnswer(item)}
+												className={`option w-100 text-start btn text-white py-2 px-3 mt-3 rounded btn-dark`}
 												disabled>
 												{item.text}
 											</button>

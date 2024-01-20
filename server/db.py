@@ -3,13 +3,18 @@ from flask import g
 from psycopg2 import sql
 from psycopg2.errors import OperationalError
 
+user = 'postgres'
+password = 'root'
+host = 'localhost'
+dbname = 'hr_app'
+
 def db_exists():
     try:
         conn = psycopg2.connect(
-            user='postgres',
-            password='1234',
-            host='localhost',
-            dbname='hr_app'
+            user=user,
+            password=password,
+            host=host,
+            dbname=dbname
         )
 
         cur = conn.cursor()
@@ -31,9 +36,10 @@ def create_db(exists=False):
         if not exists:
             # Establish a new connection to PostgreSQL without specifying a database
             conn = psycopg2.connect(
-                user='postgres',
-                password='1234',
-                host='localhost',
+                user=user,
+                password=password,
+                host=host,
+                dbname=dbname
             )
 
             # Create a cursor for the new connection
@@ -48,9 +54,9 @@ def create_db(exists=False):
             conn.close()
 
             conn = psycopg2.connect(
-                user='postgres',
-                password='1234',
-                host='localhost',
+                user=user,
+                password=password,
+                host=host,
                 dbname = 'hr_app'
             )
             
@@ -75,10 +81,10 @@ def get_db():
     db = getattr(g, '_database', None)
     if db is None:
         g._database = db = psycopg2.connect(
-             user='postgres',
-            password='1234',
-            host='localhost',
-            dbname='hr_app'
+             user=user,
+            password=password,
+            host=host,
+            dbname=dbname
         )
     return db
 

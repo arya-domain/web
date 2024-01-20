@@ -1,185 +1,178 @@
-import { useState, useEffect, useRef } from "react";
+import { useState, useEffect, useRef, useCallback } from "react";
+import io from "socket.io-client";
 import { saveVideoRecAPI } from "../apis/responses.apis";
+import { toast } from "react-toastify";
 
-let videoChunks = [];
+import useTimer from "./useTimer";
 
-const useVideoRecording = (question_id) => {
-  const [isRecording, setIsRecording] = useState(false);
-  const videoRef = useRef();
-  const mediaRecorderRef = useRef();
+// let videoChunks = [];
+let interval;
 
-  const startRecording = async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: true,
-        audio: true,
-      });
-      // videoRef.current.srcObject = stream;
-      mediaRecorderRef.current = new MediaRecorder(stream);
+const useVideoRecording = (question_id, nextQuestion) => {
+	const [isRecording, setIsRecording] = useState(false);
+	const [isSaving, setisSaving] = useState(false);
 
-      mediaRecorderRef.current.onstart = () => {
-        setIsRecording(true);
-        console.log("video recording started...");
-      };
+	const videoRef = useRef(null);
+	const mediaRecorderRef = useRef(null);
+	const canvasRef = useRef(null);
+	const socketRef = useRef(null);
+	const videoChunks = useRef([]);
+	const animationFrameRef = useRef(null);
 
-      mediaRecorderRef.current.ondataavailable = async (event) => {
-        if (event.data.size > 0) {
-          videoChunks.push(event.data);
-        }
-      };
+	const stopRecording = () => {
+		mediaRecorderRef.current?.stop();
+		videoRef.current?.srcObject.getVideoTracks()[0].stop();
+		socketRef.current?.disconnect();
+	};
 
-      mediaRecorderRef.current.onstop = async () => {
-        console.log("video recording stopped");
-        setIsRecording(false);
-        const blobObj = new Blob(videoChunks, { type: "video/webm" });
-        const videoUrl = URL.createObjectURL(blobObj);
+	const { startTimer, stopTimer } = useTimer(stopRecording);
 
-        //send this form data to server
-        const formData = new FormData();
-        formData.append("video", blobObj, "recorded_video.mp4");
-        formData.append("question_id", question_id);
+	const captureFrame = async () => {
+		if (
+			videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA &&
+			mediaRecorderRef.current?.state === "recording"
+		) {
+			console.log("Frame");
+			const canvas = canvasRef.current;
+			const context = canvas.getContext("2d");
+			context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+			let dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+			socketRef.current.emit("image_data", { image: dataUrl });
+		}
+		animationFrameRef.current = requestAnimationFrame(captureFrame);
+	};
 
-        try {
-          const response = await saveVideoRecAPI(formData);
-          console.log("Server Response:", response.data);
-        } catch (error) {
-          console.error("Error sending audio to the server:", error);
-        }
+	const startRecording = async () => {
+		try {
+			videoChunks.current = [];
 
-        //download the video file
-        // const a = document.createElement("a");
-        // document.body.appendChild(a);
-        // a.style = "display: none";
-        // a.href = videoUrl;
-        // a.download = "recorded_audio.mp4";
-        // a.click();
-        // window.URL.revokeObjectURL(videoUrl);
-        videoChunks = [];
-      };
+			if (mediaRecorderRef.current) {
+				mediaRecorderRef.current.stop();
+				videoRef.current.srcObject.getVideoTracks()[0].stop();
+			}
 
-      mediaRecorderRef.current.start();
-    } catch (error) {
-      console.error("Error accessing media devices:", error);
-    }
-  };
+			const stream = await navigator.mediaDevices.getUserMedia({
+				video: true,
+				audio: true,
+			});
 
-  const stopRecording = () => {
-    mediaRecorderRef.current?.stop();
-  };
+			mediaRecorderRef.current = new MediaRecorder(stream);
 
-  useEffect(() => {
-    return () => {
-      mediaRecorderRef.current?.stop();
-    };
-  }, []);
+			mediaRecorderRef.current.onstart = () => {
+				setIsRecording(true);
+				startTimer();
+				videoRef.current.srcObject = stream;
+				videoRef.current.play();
+				console.log("video recording started...");
+			};
 
-  if (question_id && !isRecording) {
-    startRecording();
-  }
+			mediaRecorderRef.current.ondataavailable = async (event) => {
+				if (event.data.size > 0) {
+					videoChunks.current.push(event.data);
+				}
+			};
 
-  return {
-    isRecording,
-    startRecording,
-    stopRecording,
-    // videoRef,
-  };
+			mediaRecorderRef.current.onstop = async () => {
+				console.log("video recording stopped");
+
+				setisSaving(true);
+				setIsRecording(false);
+
+				stopTimer();
+
+				const blobObj = new Blob(videoChunks.current, { type: "video/webm" });
+				const videoUrl = URL.createObjectURL(blobObj);
+
+				const formData = new FormData();
+				formData.append("video", blobObj, "recorded_video.mp4");
+				formData.append("question_id", question_id);
+
+				try {
+					await saveVideoRecAPI(formData);
+					nextQuestion();
+				} catch (error) {
+					toast.error("Failed to submit your answer!, retry!");
+					console.error("Error sending video to the server:", error);
+				}
+
+				setisSaving(false);
+
+				videoChunks.current = [];
+			};
+
+			mediaRecorderRef.current.start();
+
+			socketRef.current = io("http://localhost:8001");
+
+			socketRef.current.on("connect", () => {
+				console.log("Socket connected");
+			});
+
+			socketRef.current.on("disconnect", () => {
+				console.log("Socket disconnected");
+			});
+
+			socketRef.current.on("processed_frames", (data) => {
+				console.log("image :", data.image);
+				let modifiedImage = data.image;
+				let img = new Image();
+				const canvas = canvasRef.current;
+				const context = canvas.getContext("2d");
+				img.onload = () =>
+					context.drawImage(img, 0, 0, canvas.width, canvas.height);
+				img.src = modifiedImage;
+			});
+
+			// interval = setInterval(() => {
+			// 	if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
+			// 		const canvas = canvasRef.current;
+			// 		const context = canvas.getContext("2d");
+			// 		context.drawImage(
+			// 			videoRef.current,
+			// 			0,
+			// 			0,
+			// 			canvas.width,
+			// 			canvas.height
+			// 		);
+			// 		let dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+
+			// 		socketRef.current.emit("image_data", { image: dataUrl });
+			// 	}
+			// }, 500);
+			animationFrameRef.current = requestAnimationFrame(captureFrame);
+		} catch (error) {
+			console.error("Error accessing media devices:", error);
+		}
+	};
+
+	//when question are not being saved and its not recording then start the recoriding
+	if (!isRecording && !isSaving && question_id) {
+		startRecording();
+	}
+
+	useEffect(() => {
+		return () => {
+			console.log("clearing interval");
+			stopRecording();
+			clearInterval(interval);
+
+			// Stop and clear mediaRecorder
+			if (mediaRecorderRef.current) {
+				mediaRecorderRef.current.stop();
+				mediaRecorderRef.current = null;
+			}
+
+			videoChunks.current = [];
+			cancelAnimationFrame(animationFrameRef.current);
+		};
+	}, []);
+
+	return {
+		isSaving,
+		stopRecording,
+		videoRef,
+		canvasRef,
+	};
 };
 
 export default useVideoRecording;
-
-// import { useState, useEffect, useRef } from "react";
-// import { saveVideoRecAPI } from "../apis/responses.apis";
-
-// let videoChunks = [];
-// const maxBufferSize = 100; // Adjust the buffer size based on your requirements
-
-// const useVideoRecording = (question_id) => {
-//   const [isRecording, setIsRecording] = useState(false);
-//   const videoRef = useRef();
-//   const mediaRecorderRef = useRef();
-
-//   const startRecording = async () => {
-//     try {
-//       const stream = await navigator.mediaDevices.getUserMedia({
-//         video: true,
-//         audio: true,
-//       });
-
-//       mediaRecorderRef.current = new MediaRecorder(stream);
-
-//       mediaRecorderRef.current.onstart = () => {
-//         setIsRecording(true);
-//         console.log("video recording started...");
-//       };
-
-//       mediaRecorderRef.current.ondataavailable = async (event) => {
-//         if (event.data.size > 0) {
-//           addToBuffer(event.data);
-//         }
-//       };
-
-//       mediaRecorderRef.current.onstop = async () => {
-//         console.log("video recording stopped");
-//         setIsRecording(false);
-//         const blobObj = new Blob(videoChunks, { type: "video/webm" });
-//         const videoUrl = URL.createObjectURL(blobObj);
-
-//         // Send this form data to the server
-//         const formData = new FormData();
-//         formData.append("video", blobObj, "recorded_video.mp4");
-//         formData.append("question_id", question_id);
-
-//         try {
-//           const response = await saveVideoRecAPI(formData);
-//           console.log("Server Response:", response.data);
-//         } catch (error) {
-//           console.error("Error sending video to the server:", error);
-//         }
-
-//         // Clear the buffer after saving
-//         clearBuffer();
-//       };
-
-//       mediaRecorderRef.current.start();
-//     } catch (error) {
-//       console.error("Error accessing media devices:", error);
-//     }
-//   };
-
-//   const stopRecording = () => {
-//     mediaRecorderRef.current?.stop();
-//   };
-
-//   useEffect(() => {
-//     return () => {
-//       mediaRecorderRef.current?.stop();
-//       // Clear the buffer when the component is unmounted
-//       clearBuffer();
-//     };
-//   }, []);
-
-//   if (question_id && !isRecording) {
-//     startRecording();
-//   }
-
-//   return {
-//     isRecording,
-//     startRecording,
-//     stopRecording,
-//   };
-// };
-
-// export default useVideoRecording;
-
-// // Helper functions
-// const addToBuffer = (data) => {
-//   videoChunks.push(data);
-
-//   if (videoChunks.length > maxBufferSize) {
-//     videoChunks.shift(); // Remove the oldest element if buffer exceeds the limit
-//   }
-// };
-
-// const clearBuffer = () => {
-//   videoChunks = [];
-// };

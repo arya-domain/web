@@ -5,16 +5,20 @@ import useSWR from "swr";
 import { getQuizes } from "../apis/quizes.apis";
 import { useAuth } from "../context/AuthProvider";
 import HomePageHeader from "../components/HomePageHeader";
+import { toast } from "react-toastify";
 
 const Home = () => {
 	const { data, isLoading, error } = useSWR("/quiz", getQuizes);
 
 	const { firstName } = useAuth();
 
+	if (error) {
+		toast.error("something went wrong!");
+	}
+
 	return (
 		<div>
 			<HomePageHeader />
-
 			<section
 				style={{ minHeight: "100vh", width: "100%" }}
 				className="p-5 container-fluid d-flex flex-column  align-items-center text-white bg-dark min">
@@ -50,7 +54,7 @@ const Card = ({ title, id }) => {
 				<div className="card-body">
 					<h5 className="card-title text-black">Test #{id}</h5>
 					<p className="card-text text-black">{title}</p>
-					<Link to={`/quiz/${id}`} className="card-link">
+					<Link to={`/quiz/${id}/start`} className="card-link">
 						Take Test
 					</Link>
 				</div>
