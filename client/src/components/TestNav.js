@@ -26,7 +26,7 @@ const TestNav = () => {
 			const d = await endQuizApi(quizId);
 			toast.success("Test ended!");
 
-			navigate("/");
+			window.location.href = "/";
 		} catch (error) {
 			console.log(error);
 			if (error.response?.data?.message) {
