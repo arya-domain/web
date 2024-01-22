@@ -6,6 +6,7 @@ export const KEYS = {
 
 export const getUser = () => {
 	return secureStorage.getItem(KEYS.USER);
+	// return localStorage.getItem(KEYS.USER);
 	// return {
 	// 	isAuth: true,
 	// 	id: 2,
@@ -16,8 +17,10 @@ export const getUser = () => {
 
 export const setUser = (user = {}) => {
 	secureStorage.setItem(KEYS.USER, user);
+	// localStorage.setItem(KEYS.USER, user);
 };
 
 export const removeUser = () => {
 	secureStorage.removeItem(KEYS.USER);
+	// localStorage.removeItem(KEYS.USER);
 };

@@ -5,8 +5,8 @@ import { useParams } from "react-router-dom";
 import { processResponseAPI } from "../apis/responses.apis";
 
 const Processing = () => {
-	const [isLoading, setisLoading] = useState(true);
-	const [isSuccess, setisSuccess] = useState(false);
+	const [isLoading, setisLoading] = useState(false);
+	const [isSuccess, setisSuccess] = useState(true);
 	const [isError, setisError] = useState(false);
 	const [score, setscore] = useState(null);
 	const { id: quizId } = useParams();
@@ -19,16 +19,16 @@ const Processing = () => {
 
 	useEffect(() => {
 		processResponseAPI()
-			.then((dt) => {
-				setisSuccess(true);
-				setscore(dt.score);
-			})
-			.catch((e) => {
-				setisError(true);
-				console.log(e);
-			})
+			// .then((dt) => {
+			// 	setisSuccess(true);
+			// 	setscore(dt.score);
+			// })
+			// .catch((e) => {
+			// 	setisError(true);
+			// 	console.log(e);
+			// })
 			.finally(() => {
-				setisLoading(false);
+				// setisLoading(false);
 			});
 	}, []);
 
@@ -53,10 +53,13 @@ const Processing = () => {
 											Thank you for taking the test!
 										</h1>
 										<h3 className="mb-3 fw-bold">
-											{/* Test Submitted successfully */}
-											Score : {""}
-											{score}
+											we will email you the score. Stay Tuned.
 										</h3>
+										<button
+											onClick={handleEnd}
+											className="btn py-2 px-4 btn-light fw-bold d-inline">
+											Go To Dashboard
+										</button>
 									</div>
 								)}
 								{isError && (

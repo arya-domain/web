@@ -52,7 +52,7 @@ function Login() {
 			<Container
 				className="d-flex justify-content-center align-items-center"
 				style={{ height: "100vh" }}>
-				<Row className="w-25 p-4 rounded-3 bg-light">
+				<Row className="w-50 p-4 rounded-3 bg-light">
 					<Col>
 						<h2 className="text-center mb-4">Login</h2>
 						<Form onSubmit={handleSubmit}>
