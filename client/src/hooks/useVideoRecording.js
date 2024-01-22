@@ -27,19 +27,55 @@ const useVideoRecording = (question_id, nextQuestion) => {
 
 	const { startTimer, stopTimer } = useTimer(stopRecording);
 
+	const renderProcessedFrame = useCallback((imageData) => {
+		const canvas = canvasRef.current;
+		const context = canvas.getContext("2d");
+
+		let img = new Image();
+
+		img.onload = () => {
+			context.drawImage(img, 0, 0, canvas.width, canvas.height);
+		};
+
+		img.src = imageData;
+	}, []);
+
 	const captureFrame = async () => {
 		if (
 			videoRef.current?.readyState === videoRef.current?.HAVE_ENOUGH_DATA &&
 			mediaRecorderRef.current?.state === "recording"
 		) {
 			console.log("Frame");
-			const canvas = canvasRef.current;
-			const context = canvas.getContext("2d");
-			context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
-			let dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+			// const canvas = canvasRef.current;
+			// const context = canvas.getContext("2d");
+			// context.drawImage(videoRef.current, 0, 0, canvas.width, canvas.height);
+			// let dataUrl = canvas.toDataURL("image/jpeg", 1.0);
+			// if (!videoRef.current) {
+			// 	console.log("no video");
+			// 	return;
+			// }
+			// let dataUrl = videoRef.current.toDataURL("image/jpeg", 1.0);
+			// socketRef.current.emit("image_data", { image: dataUrl });
+			const offscreenCanvas = document.createElement("canvas");
+			const offscreenContext = offscreenCanvas.getContext("2d");
+
+			const video = videoRef.current;
+			offscreenCanvas.width = video.videoWidth;
+			offscreenCanvas.height = video.videoHeight;
+
+			offscreenContext.drawImage(
+				video,
+				0,
+				0,
+				offscreenCanvas.width,
+				offscreenCanvas.height
+			);
+
+			let dataUrl = offscreenCanvas.toDataURL("image/jpeg", 1.0);
+
 			socketRef.current.emit("image_data", { image: dataUrl });
 		}
-		animationFrameRef.current = requestAnimationFrame(captureFrame);
+		// animationFrameRef.current = requestAnimationFrame(captureFrame);
 	};
 
 	const startRecording = async () => {
@@ -113,33 +149,12 @@ const useVideoRecording = (question_id, nextQuestion) => {
 			});
 
 			socketRef.current.on("processed_frames", (data) => {
-				console.log("image :", data.image);
-				let modifiedImage = data.image;
-				let img = new Image();
-				const canvas = canvasRef.current;
-				const context = canvas.getContext("2d");
-				img.onload = () =>
-					context.drawImage(img, 0, 0, canvas.width, canvas.height);
-				img.src = modifiedImage;
+				console.log("image received!");
+				renderProcessedFrame(data.image);
 			});
 
-			// interval = setInterval(() => {
-			// 	if (videoRef.current.readyState === videoRef.current.HAVE_ENOUGH_DATA) {
-			// 		const canvas = canvasRef.current;
-			// 		const context = canvas.getContext("2d");
-			// 		context.drawImage(
-			// 			videoRef.current,
-			// 			0,
-			// 			0,
-			// 			canvas.width,
-			// 			canvas.height
-			// 		);
-			// 		let dataUrl = canvas.toDataURL("image/jpeg", 1.0);
-
-			// 		socketRef.current.emit("image_data", { image: dataUrl });
-			// 	}
-			// }, 500);
-			animationFrameRef.current = requestAnimationFrame(captureFrame);
+			interval = setInterval(captureFrame, 500);
+			// animationFrameRef.current = requestAnimationFrame(captureFrame);
 		} catch (error) {
 			console.error("Error accessing media devices:", error);
 		}
@@ -163,7 +178,7 @@ const useVideoRecording = (question_id, nextQuestion) => {
 			}
 
 			videoChunks.current = [];
-			cancelAnimationFrame(animationFrameRef.current);
+			// cancelAnimationFrame(animationFrameRef.current);
 		};
 	}, []);
 

@@ -69,7 +69,9 @@ def handle_image(data):
 
     _, img_encoded = cv2.imencode(".jpg", img)
     img_base64 = base64.b64encode(img_encoded).decode()
-    return jsonify({"image": "data:image/jpeg;base64," + img_base64})
+    emit("processed_frames", {"image": "data:image/jpeg;base64," + img_base64})
+    return
+    # return jsonify({"image": "data:image/jpeg;base64," + img_base64})
 
 if __name__ == "__main__":
     host = "127.0.0.1"
