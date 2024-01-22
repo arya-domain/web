@@ -2,7 +2,7 @@ import { useEffect } from "react";
 
 let interval;
 
-const MAX_MINS_MSEC = 1000 * 60 * 1;
+const MAX_MINS_MSEC = 1000 * 60 * 1.5; //1.30 min
 // const MAX_MINS_MSEC = 1000 * 10;
 
 let timer = MAX_MINS_MSEC;
