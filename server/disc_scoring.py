@@ -68,7 +68,7 @@ def contains_substring(text):
     - substring if any substring is found, False otherwise.
     """
     for substring in scoring.keys():
-        if substring in text:
+        if substring.lower() in text:
             return substring
     return False
 # @jwt_required
@@ -82,9 +82,10 @@ def disc_score():
         # user_id = get_jwt_identity();
         for path in video_paths:
             str_path= os.path.join(os.getcwd(),path[0])
+            print(path[0])
             # emotion_score = detect_emotion(str_path)
-            response = audio_data_to_text(str_path)
-            trait_scores['S'] += scoring[contains_substring(response[50])]  # Steadiness trait for both sets
+            response = audio_data_to_text(str_path, path[0])
+            trait_scores['S'] += scoring[contains_substring(response[:])]  # Steadiness trait for both sets
             # emotion_disc_score = emotion_mapping(emotion_score)
             # trait_scores['S'] += emotion_disc_score
             print(trait_scores['S'])

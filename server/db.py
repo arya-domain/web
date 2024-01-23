@@ -2,9 +2,8 @@ import psycopg2
 from flask import g
 from psycopg2 import sql
 from psycopg2.errors import OperationalError
-
 user = 'postgres'
-password = 'root'
+password = '1234'
 host = 'localhost'
 dbname = 'hr_app'
 
@@ -27,7 +26,7 @@ def db_exists():
         return exists is not None
 
     except OperationalError as e:
-        # print(f"Error: {e}")
+        print(f"Error: {e}")
         return False
 
 
@@ -39,7 +38,6 @@ def create_db(exists=False):
                 user=user,
                 password=password,
                 host=host,
-                dbname=dbname
             )
 
             # Create a cursor for the new connection
@@ -102,7 +100,7 @@ def execute_query(query, values=None, fetchone=False):
         cursor.execute(query, values)
         result = cursor.fetchone() if fetchone else cursor.fetchall()
     return result
-
 exists = db_exists()
 if not exists:
     create_db()
+
