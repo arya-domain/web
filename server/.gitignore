@@ -5,7 +5,6 @@
 /.pnp
 .pnp.js
 hr-app
-/server/recordings/*
 __pycache__
 
 # testing
@@ -27,3 +26,8 @@ yarn-error.log*
 
 recordings/*
 !recordings/.gitkeep
+
+# IO files
+/server/recordings/*
+/server/output/*
+quiz copy.json
