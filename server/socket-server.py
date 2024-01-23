@@ -28,6 +28,7 @@ def face_detection(data):
     try:
         from facial_detection import handle_image
         img_base64 = handle_image(data)
+        # emit("processed_frames", {"image": "detected"+img_base64})
         emit("processed_frames", {"image": "data:image/jpeg;base64," + img_base64})
 
     except Exception as e:

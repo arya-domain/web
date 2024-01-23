@@ -1,4 +1,4 @@
-# import speech_recognition as sr
+from db import execute_query, get_db
 import whisper
 from langdetect import detect
 
@@ -14,10 +14,7 @@ def convert_video_to_audio(input_video):
     try:
         subprocess.run(['ffmpeg', '-i', str(input_video), '-t', '60', str(output_video)])        
         # Load the video clip
-        # print(input_video+"_duration")
-        # print(type(input_video+"_duration"))
         video_clip = VideoFileClip(output_video)
-        # video_clip = video_clip.Clip(0,60)
         # Extract audio from the video clip
         audio_clip = video_clip.audio
 
@@ -32,8 +29,7 @@ def convert_video_to_audio(input_video):
         print(f"Error in converting video file to audio: {str(e)}")
         return None
 
-
-def audio_data_to_text(file_path):
+def audio_data_to_text(file_path, path):
     ''' 1. Accessing audio files from their file paths (first will try on already saved audio files and the nmove to converting audio from video files)
         2. Converting audio files to speech
         3. Inserting transcribed text in database
@@ -47,7 +43,16 @@ def audio_data_to_text(file_path):
     result = model.transcribe(audio_path)
     transcribed_text = result["text"]
     print(transcribed_text)
+    query = '''
+            UPDATE response_recordings 
+            SET transcribed_text = %s
+            WHERE video_path = %s
+            RETURNING *;
+            '''
+    values = (transcribed_text, path)
+    result = execute_query(query, values, fetchone=True)
 
+    get_db().commit()
     # Detect the language
     language = detect(transcribed_text)
     print(f"Detected language: {language}")
